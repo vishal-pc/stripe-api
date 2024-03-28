@@ -30,12 +30,12 @@ export const createPayment = async (req, res) => {
 
 export const handleStripeWebhook = async (req, res) => {
   console.log("Received webhook request:", req.body);
-  const sig = request.headers["stripe-signature"];
+  const sig = req.headers["stripe-signature"];
 
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
