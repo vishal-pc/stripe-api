@@ -23,31 +23,33 @@ app.post(
   "/webhooks",
   express.raw({ type: "application/json" }),
   (request, response) => {
-    let event;
     let session = "";
     const payload = request.body;
     const sig = request.headers["stripe-signature"];
     const endpointSecret = envConfig.WEB_HOOK;
 
     try {
-      event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
+      const event = stripe.webhooks.constructEvent(
+        payload,
+        sig,
+        endpointSecret
+      );
+      // Handle the event
+      switch (event.type) {
+        case "checkout.session.async_payment_failed":
+          session = event.data.object;
+          break;
+        case "checkout.session.completed":
+          session = event.data.object;
+          break;
+        default:
+          console.log(`Unhandled event type ${event.type}`);
+      }
+      return response.send();
     } catch (err) {
       response.status(400).send(`Webhook Error: ${err.message}`);
       return;
     }
-    // Handle the event
-    switch (event.type) {
-      case "checkout.session.async_payment_failed":
-        session = event.data.object;
-        break;
-      case "checkout.session.completed":
-        session = event.data.object;
-        break;
-      default:
-        console.log(`Unhandled event type ${event.type}`);
-    }
-
-    return response.send();
   }
 );
 app.listen(port, () => {
