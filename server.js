@@ -20,7 +20,7 @@ app.use("/", userRoutes);
 
 app.post(
   "/webhook",
-  bodyParser.raw({ type: "application/json" }),
+  express.raw({ type: "application/json" }),
   handleStripeWebhook
 );
 
