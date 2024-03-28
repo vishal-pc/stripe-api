@@ -20,45 +20,41 @@ app.use(cors({ origin: "*", methods: "GET, POST, PUT, DELETE" }));
 
 app.use("/", userRoutes);
 
-app.post(
-  "/webhook",
-  express.raw({ type: "application/json" }),
-  (request, response) => {
-    console.log("Received webhook request:", request.body);
-    const sig = request.headers["stripe-signature"];
+app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
+  handleStripeWebhook(req, res);
+});
 
-    let event;
+const handleStripeWebhook = async (req, res) => {
+  console.log("Received webhook request:", req.body);
+  const sig = req.headers["stripe-signature"];
 
-    try {
-      event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
-      console.log("Initiate webhook event ==>", event);
-    } catch (err) {
-      response.status(400).send(`Webhook Error: ${err.message}`);
-    }
+  let event;
 
-    switch (event.type) {
-      case "payment_intent.succeeded":
-        const paymentIntent = event.data.object;
-        console.log("PaymentIntent was successful ==>", paymentIntent);
-        break;
-      case "payment_method.attached":
-        const paymentMethod = event.data.object;
-        console.log(
-          "PaymentMethod was attached to a Customer ==>",
-          paymentMethod
-        );
-        break;
-      case "payment_intent.payment_failed":
-        const paymentFailed = event.data.object;
-        console.log("Payment failed ==>", paymentFailed);
-        break;
-      default:
-        console.log(`Unhandled event type ==> ${event.type}`);
-    }
-
-    response.json({ received: true });
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    console.log("Received webhook event:", event);
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-);
+  switch (event.type) {
+    case "payment_intent.succeeded":
+      const paymentIntent = event.data.object;
+      console.log("PaymentIntent was successful:", paymentIntent);
+      break;
+    case "payment_method.attached":
+      const paymentMethod = event.data.object;
+      console.log("PaymentMethod was attached to a Customer:", paymentMethod);
+      break;
+    case "payment_intent.payment_failed":
+      const paymentFailed = event.data.object;
+      console.log("Payment failed:", paymentFailed);
+      break;
+    default:
+      console.log(`Unhandled event type: ${event.type}`);
+  }
+
+  res.json({ received: true });
+};
 
 app.listen(port, () => {
   console.log(`Server is running... 🚀`);
