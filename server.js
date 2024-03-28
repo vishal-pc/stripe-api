@@ -19,35 +19,15 @@ app.use(cors({ origin: "*", methods: "GET, POST, PUT, DELETE" }));
 
 app.use("/", userRoutes);
 
-// app.post(
-//   "/webhooks",
-//   bodyParser.raw({ type: "application/json" }),
-//   async (req, res) => {
-//     const signingSecret = envConfig.WEB_HOOK;
-//     const payload = req.body;
-//     const signature = req.headers["stripe-signature"];
-//     let event;
-//     try {
-//       event = stripe.webhooks.constructEvent(payload, signature, signingSecret);
-//     } catch (err) {
-//       return res.status(400).send(`Webhook Error: ${err.message}`);
-//     }
-//     // console.log("Event type ==>", event.type);
-//     // console.log("Event data ==>", event.data.object);
-//     // console.log("Event id ==>", event.data.object.id);
-//     return res.json({ success: true });
-//   }
-// );
-
-let endpointSecret = "whsec_ETGe17n8Dyx4eyjIBzfXbbBLHlwCHiWN";
-let session = "";
 app.post(
   "/webhooks",
   express.raw({ type: "application/json" }),
   (request, response) => {
-    const sig = request.headers["stripe-signature"];
-    const payload = request.body;
     let event;
+    let session = "";
+    const payload = request.body;
+    const sig = request.headers["stripe-signature"];
+    const endpointSecret = envConfig.WEB_HOOK;
 
     try {
       event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
@@ -67,7 +47,7 @@ app.post(
         console.log(`Unhandled event type ${event.type}`);
     }
 
-    response.send();
+    return response.send();
   }
 );
 app.listen(port, () => {
