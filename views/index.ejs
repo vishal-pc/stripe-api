@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subscription Checkout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="title">Subscribe Now!</h1>
+      <form id="checkout-form">
+        <select id="product-select" class="select">
+          <option value="" disabled selected>Select a product</option>
+        </select>
+        <div id="payment-form" class="payment-form" style="display: none"></div>
+        <button type="submit" class="subscribe-btn">Subscribe</button>
+      </form>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const stripe = Stripe("pk_test_VkhAyPim0pKv8h8cW0J0JU4H");
+        const elements = stripe.elements();
+        const paymentForm = document.getElementById("payment-form");
+        const checkoutForm = document.getElementById("checkout-form");
+        const productSelect = document.getElementById("product-select");
+
+        async function fetchProducts() {
+          const response = await fetch("/product");
+          const data = await response.json();
+          return data.products;
+        }
+
+        const products = await fetchProducts();
+        products.forEach((product) => {
+          const option = document.createElement("option");
+          option.value = product.price;
+          option.text = product.name;
+          productSelect.appendChild(option);
+        });
+
+        const card = elements.create("card");
+        card.mount("#payment-form");
+
+        checkoutForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const selectedProductId = productSelect.value;
+
+          const { sessionId } = await fetch("/payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ priceId: selectedProductId }),
+          }).then((res) => res.json());
+
+          const { error } = await stripe.redirectToCheckout({
+            sessionId: sessionId,
+          });
+
+          if (error) {
+            console.error(error);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
