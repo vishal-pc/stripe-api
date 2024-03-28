@@ -18,11 +18,9 @@ app.use(cors({ origin: "*", methods: "GET, POST, PUT, DELETE" }));
 
 app.use("/", userRoutes);
 
-app.post(
-  "/webhook",
-  express.raw({ type: "application/json" }),
-  handleStripeWebhook
-);
+app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
+  handleStripeWebhook(req, res);
+});
 
 app.listen(port, () => {
   console.log(`Server is running... 🚀`);
