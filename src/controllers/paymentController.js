@@ -2,6 +2,7 @@ import stripePackage from "stripe";
 import envConfig from "../config/envConfig.js";
 
 const stripe = stripePackage(envConfig.SECRET_KEY);
+const endpointSecret = envConfig.WEB_HOOK;
 
 export const createPayment = async (req, res) => {
   try {
@@ -29,24 +30,27 @@ export const createPayment = async (req, res) => {
 
 export const handleStripeWebhook = async (req, res) => {
   console.log("Received webhook request:", req.body);
-  const sig = req.headers["stripe-signature"];
+  const sig = request.headers["stripe-signature"];
+
   let event;
+
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, envConfig.WEB_HOOK);
+    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
   } catch (err) {
-    console.error(err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-
+  // Handle the event
   switch (event.type) {
     case "payment_intent.succeeded":
-      console.log("Payment succeeded:", event.data.object);
+      const paymentIntent = event.data.object;
+      console.log("PaymentIntent was successful!", paymentIntent);
       break;
-    case "payment_intent.payment_failed":
-      console.log("Payment failed:", event.data.object);
+    case "payment_method.attached":
+      const paymentMethod = event.data.object;
+      console.log("PaymentMethod was attached to a Customer!", paymentMethod);
       break;
     default:
-      console.log(`Unhandled event type: ${event.type}`);
+      console.log(`Unhandled event type ${event.type}`);
   }
 
   return res.json({ received: true });
