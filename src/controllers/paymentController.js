@@ -36,6 +36,7 @@ export const handleStripeWebhook = async (req, res) => {
 
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    console.log("Received webhook event:", event);
   } catch (err) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
