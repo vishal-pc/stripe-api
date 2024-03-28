@@ -3,6 +3,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import envConfig from "./src/config/envConfig.js";
 import userRoutes from "./src/routes/routes.js";
+import { handleStripeWebhook } from "./src/controllers/paymentController.js";
 
 const app = express();
 const port = envConfig.PORT;
@@ -16,6 +17,12 @@ app.set("view engine", "ejs");
 app.use(cors({ origin: "*", methods: "GET, POST, PUT, DELETE" }));
 
 app.use("/", userRoutes);
+
+app.post(
+  "/webhook",
+  bodyParser.raw({ type: "application/json" }),
+  handleStripeWebhook
+);
 
 app.listen(port, () => {
   console.log(`Server is running... 🚀`);

@@ -28,6 +28,7 @@ export const createPayment = async (req, res) => {
 };
 
 export const handleStripeWebhook = async (req, res) => {
+  console.log("Received webhook request:", req.body);
   const sig = req.headers["stripe-signature"];
   let event;
   try {
@@ -48,5 +49,5 @@ export const handleStripeWebhook = async (req, res) => {
       console.log(`Unhandled event type: ${event.type}`);
   }
 
-  res.json({ received: true });
+  return res.json({ received: true });
 };

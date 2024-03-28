@@ -4,10 +4,7 @@ import {
   getProductById,
   getProducts,
 } from "../controllers/stripeController.js";
-import {
-  createPayment,
-  handleStripeWebhook,
-} from "../controllers/paymentController.js";
+import { createPayment } from "../controllers/paymentController.js";
 
 const router = express.Router();
 
@@ -28,10 +25,5 @@ router.get("/product/:productId", getProductById);
 router.get("/product", getProducts);
 
 router.post("/payment", createPayment);
-router.post(
-  "/webhook",
-  express.raw({ type: "application/json" }),
-  handleStripeWebhook
-);
 
 export default router;
