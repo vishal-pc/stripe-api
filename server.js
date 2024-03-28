@@ -3,8 +3,12 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import envConfig from "./src/config/envConfig.js";
 import userRoutes from "./src/routes/routes.js";
+import stripePackage from "stripe";
+
 const app = express();
 const port = envConfig.PORT;
+const stripe = stripePackage(envConfig.SECRET_KEY);
+const endpointSecret = "whsec_DczDhixKHy9cVhqCpOEL4n5QBPaszYvD";
 
 app.use(express.json());
 app.use(bodyParser.json());
@@ -16,7 +20,6 @@ app.use(cors({ origin: "*", methods: "GET, POST, PUT, DELETE" }));
 
 app.use("/", userRoutes);
 
-const endpointSecret = "whsec_DczDhixKHy9cVhqCpOEL4n5QBPaszYvD";
 app.post(
   "/webhook",
   express.raw({ type: "application/json" }),
