@@ -31,29 +31,33 @@ const handleStripeWebhook = async (req, res) => {
   let event;
 
   try {
+    console.log("Enter the try block ==> ");
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
     console.log("Received webhook event:", event);
   } catch (err) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
   switch (event.type) {
-    case "payment_intent.succeeded":
-      const paymentIntent = event.data.object;
-      console.log("PaymentIntent was successful:", paymentIntent);
-      break;
     case "payment_method.attached":
-      const paymentMethod = event.data.object;
-      console.log("PaymentMethod was attached to a Customer:", paymentMethod);
+      const paymentMethodAttached = event.data.object;
+      console.log("PaymentIntent attached ==>", paymentMethodAttached);
       break;
-    case "payment_intent.payment_failed":
-      const paymentFailed = event.data.object;
-      console.log("Payment failed:", paymentFailed);
+    case "payment_method.card_automatically_updated":
+      const paymentMethodCardAutomaticallyUpdated = event.data.object;
+      console.log(
+        "PaymentMethod method updated ==>",
+        paymentMethodCardAutomaticallyUpdated
+      );
+      break;
+    case "payment_method.detached":
+      const paymentMethodDetached = event.data.object;
+      console.log("Payment detached ==>", paymentMethodDetached);
       break;
     default:
       console.log(`Unhandled event type: ${event.type}`);
   }
 
-  res.json({ received: true });
+  response.send();
 };
 
 app.listen(port, () => {
