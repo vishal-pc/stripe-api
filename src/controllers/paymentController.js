@@ -36,7 +36,7 @@ export const handleStripeWebhook = async (req, res) => {
 
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-    console.log("Received webhook event:", event);
+    console.log("Initiate webhook event ==>", event);
   } catch (err) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
@@ -44,14 +44,17 @@ export const handleStripeWebhook = async (req, res) => {
   switch (event.type) {
     case "payment_intent.succeeded":
       const paymentIntent = event.data.object;
-      console.log("PaymentIntent was successful!", paymentIntent);
+      console.log("PaymentIntent was successful ==>", paymentIntent);
       break;
     case "payment_method.attached":
       const paymentMethod = event.data.object;
-      console.log("PaymentMethod was attached to a Customer!", paymentMethod);
+      console.log(
+        "PaymentMethod was attached to a Customer ==>",
+        paymentMethod
+      );
       break;
     default:
-      console.log(`Unhandled event type ${event.type}`);
+      console.log(`Unhandled event type ==> ${event.type}`);
   }
 
   return res.json({ received: true });
