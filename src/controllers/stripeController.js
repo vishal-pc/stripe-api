@@ -13,7 +13,7 @@ export const createStripeProduct = async (req, res) => {
     const price = await stripe.prices.create({
       product: product.id,
       unit_amount: req.body.default_price_data.unit_amount,
-      currency: "inr",
+      currency: "usd",
       recurring: {
         interval: "day",
       },

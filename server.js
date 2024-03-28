@@ -19,23 +19,55 @@ app.use(cors({ origin: "*", methods: "GET, POST, PUT, DELETE" }));
 
 app.use("/", userRoutes);
 
+// app.post(
+//   "/webhooks",
+//   bodyParser.raw({ type: "application/json" }),
+//   async (req, res) => {
+//     const signingSecret = envConfig.WEB_HOOK;
+//     const payload = req.body;
+//     const signature = req.headers["stripe-signature"];
+//     let event;
+//     try {
+//       event = stripe.webhooks.constructEvent(payload, signature, signingSecret);
+//     } catch (err) {
+//       return res.status(400).send(`Webhook Error: ${err.message}`);
+//     }
+//     // console.log("Event type ==>", event.type);
+//     // console.log("Event data ==>", event.data.object);
+//     // console.log("Event id ==>", event.data.object.id);
+//     return res.json({ success: true });
+//   }
+// );
+
+let endpointSecret = "whsec_ETGe17n8Dyx4eyjIBzfXbbBLHlwCHiWN";
+let session = "";
 app.post(
   "/webhooks",
-  bodyParser.raw({ type: "application/json" }),
-  async (req, res) => {
-    const signingSecret = envConfig.WEB_HOOK;
-    const payload = req.body;
-    const signature = req.headers["stripe-signature"];
+  express.raw({ type: "application/json" }),
+  (request, response) => {
+    const sig = request.headers["stripe-signature"];
+    const payload = request.body;
     let event;
+
     try {
-      event = stripe.webhooks.constructEvent(payload, signature, signingSecret);
+      event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
     } catch (err) {
-      return res.status(400).send(`Webhook Error: ${err.message}`);
+      response.status(400).send(`Webhook Error: ${err.message}`);
+      return;
     }
-    // console.log("Event type ==>", event.type);
-    // console.log("Event data ==>", event.data.object);
-    // console.log("Event id ==>", event.data.object.id);
-    return res.json({ success: true });
+    // Handle the event
+    switch (event.type) {
+      case "checkout.session.async_payment_failed":
+        session = event.data.object;
+        break;
+      case "checkout.session.completed":
+        session = event.data.object;
+        break;
+      default:
+        console.log(`Unhandled event type ${event.type}`);
+    }
+
+    response.send();
   }
 );
 app.listen(port, () => {
