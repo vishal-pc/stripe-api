@@ -7,7 +7,7 @@ import stripePackage from "stripe";
 
 const app = express();
 const port = envConfig.PORT;
-// const stripe = stripePackage(envConfig.SECRET_KEY);
+const stripe = stripePackage(envConfig.SECRET_KEY);
 
 app.use(express.json());
 app.use(bodyParser.json());
@@ -53,7 +53,6 @@ app.use("/", userRoutes);
 //   }
 // );
 let signingSecret = "whsec_ETGe17n8Dyx4eyjIBzfXbbBLHlwCHiWN";
-const stripe = stripePackage(envConfig.SECRET_KEY);
 app.post("/webhooks", async (req, res) => {
   let data;
   let eventType;
