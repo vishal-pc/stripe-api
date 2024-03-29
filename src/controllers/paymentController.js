@@ -8,7 +8,6 @@ export const createPayment = async (req, res) => {
     const { priceId } = req.body;
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
       line_items: [
         {
           price: priceId,
