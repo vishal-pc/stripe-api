@@ -7,7 +7,7 @@ import stripePackage from "stripe";
 
 const app = express();
 const port = envConfig.PORT;
-const stripe = stripePackage(envConfig.SECRET_KEY);
+// const stripe = stripePackage(envConfig.SECRET_KEY);
 
 app.use(express.json());
 app.use(bodyParser.json());
@@ -52,20 +52,18 @@ app.use("/", userRoutes);
 //     }
 //   }
 // );
-
+let signingSecret = "whsec_ETGe17n8Dyx4eyjIBzfXbbBLHlwCHiWN";
+const stripe = stripePackage("sk_test_F0rBzpqmt4WfhAyEPQQBLAxJ");
 app.post("/webhooks", async (req, res) => {
   let data;
   let eventType;
-  if (envConfig.WEB_HOOK) {
+  let payload = req.body;
+  if (signingSecret) {
     let event;
     let signature = req.headers["stripe-signature"];
 
     try {
-      event = stripe.webhooks.constructEvent(
-        req.rawBody,
-        signature,
-        envConfig.WEB_HOOK
-      );
+      event = stripe.webhooks.constructEvent(payload, signature, signingSecret);
     } catch (err) {
       console.log(`Webhook signature verification failed.`);
       return res.sendStatus(400);
