@@ -53,7 +53,7 @@ app.use("/", userRoutes);
 //   }
 // );
 let signingSecret = "whsec_ETGe17n8Dyx4eyjIBzfXbbBLHlwCHiWN";
-const stripe = stripePackage("sk_test_F0rBzpqmt4WfhAyEPQQBLAxJ");
+const stripe = stripePackage(envConfig.SECRET_KEY);
 app.post("/webhooks", async (req, res) => {
   let data;
   let eventType;
