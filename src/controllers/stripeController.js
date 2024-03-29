@@ -1,7 +1,7 @@
-import stripePackage from "stripe";
+import Stripe from "stripe";
 import envConfig from "../config/envConfig.js";
 
-const stripe = stripePackage(envConfig.SECRET_KEY);
+const stripe = new Stripe(envConfig.SECRET_KEY);
 
 export const createStripeProduct = async (req, res) => {
   try {
