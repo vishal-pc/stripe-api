@@ -41,7 +41,7 @@ body {
   display: block;
   width: 100%;
   padding: 10px;
-  background-color: #007bff;
+  background-color: #ff3f3f;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -49,5 +49,5 @@ body {
 }
 
 .subscribe-btn:hover {
-  background-color: #0056b3;
+  background-color: #9b3333;
 }
